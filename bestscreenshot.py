@@ -20,7 +20,7 @@ class ScreenshotOptmizer(Gtk.Window):
     def __init__(self):
         super().__init__(title="Screenshot Optimizer")
         self.set_border_width(10)
-        self.set_default_size(800, 250)
+        self.set_default_size(800, 600)  # Adjusted initial size to accommodate larger frame area
 
         # Create main box
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -55,9 +55,8 @@ class ScreenshotOptmizer(Gtk.Window):
         output_directory_button.connect("clicked", self.on_select_output_directory)
         grid.attach(output_directory_button, 2, 1, 1, 1)
 
-        # Scrollable area to display video frames
-        self.frame_area = Gtk.ScrolledWindow(hexpand=True)
-        self.frame_area.set_min_content_height(600)
+        # Scrollable area to display video frames, allow both horizontal and vertical expansion
+        self.frame_area = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
         self.frame_area.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         grid.attach(self.frame_area, 0, 2, 3, 1)
 
@@ -67,19 +66,19 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_slider.connect("value-changed", self.on_frame_slider_changed)
         grid.attach(self.frame_slider, 0, 3, 3, 1)
 
+        # Status Label (Moved below the frame area)
+        self.status_label = Gtk.Label(label="")
+        grid.attach(self.status_label, 0, 4, 3, 1)
+
         # Screenshot button
         screenshot_button = Gtk.Button(label="Take Screenshot")
         screenshot_button.connect("clicked", self.on_take_screenshot)
-        grid.attach(screenshot_button, 0, 4, 3, 1)
+        grid.attach(screenshot_button, 0, 5, 3, 1)
 
-        self.frame_images = []  # List to store Image objects, has to be empty
+        self.frame_images = []  # List to store Image objects
         self.current_frame = 0
-        self.video = None  # This is a placeholder for the loaded video
+        self.video = None  # Placeholder for the loaded video
         self.pixbuf_cache = []  # Cache GdkPixbuf for smoother scrolling
-
-        # Status Label
-        self.status_label = Gtk.Label(label="")
-        vbox.pack_start(self.status_label, False, False, 0)
 
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
@@ -174,7 +173,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_area.add(image_widget)
         self.frame_area.show_all()
 
-    def on_take_screenshot(self, widget): #This operation logic can be optimized
+    def on_take_screenshot(self, widget):
         if not self.frame_images:
             self.show_error_dialog("Error: Please select a proper video file.")
             return
@@ -182,7 +181,7 @@ class ScreenshotOptmizer(Gtk.Window):
         output_folder = self.output_entry.get_text()
 
         if not output_folder:
-            self.show_error_dialog("Error: Please select an proper input file and/or an output folder.")
+            self.show_error_dialog("Error: Please select a proper output folder.")
             return
 
         if not os.path.exists(output_folder):
@@ -203,4 +202,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
