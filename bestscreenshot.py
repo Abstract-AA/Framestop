@@ -6,6 +6,8 @@ from moviepy.editor import VideoFileClip
 import os
 from PIL import Image
 
+#this script is called bestscreenshot.py
+
 # Monkey patch for the deprecated Image.ANTIALIAS in PIL
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.Resampling.LANCZOS  # Ensure compatibility with Pillow 10.x
@@ -20,7 +22,7 @@ class ScreenshotOptmizer(Gtk.Window):
     def __init__(self):
         super().__init__(title="Screenshot Optimizer")
         self.set_border_width(10)
-        self.set_default_size(800, 600)  # Adjusted initial size to accommodate larger frame area
+        self.set_default_size(800, 600)  
 
         # Create main box
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -79,6 +81,8 @@ class ScreenshotOptmizer(Gtk.Window):
         self.current_frame = 0
         self.video = None  # Placeholder for the loaded video
         self.pixbuf_cache = []  # Cache GdkPixbuf for smoother scrolling
+
+        #a sidebar for further options and fine tuning adjustments could be included, consider this later
 
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
@@ -173,7 +177,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_area.add(image_widget)
         self.frame_area.show_all()
 
-    def on_take_screenshot(self, widget):
+    def on_take_screenshot(self, widget): #maybe the operational logic of this function can be improved. Consider changing in the future.
         if not self.frame_images:
             self.show_error_dialog("Error: Please select a proper video file.")
             return
@@ -202,3 +206,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
