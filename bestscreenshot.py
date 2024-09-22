@@ -72,15 +72,14 @@ class ScreenshotOptmizer(Gtk.Window):
         screenshot_button.connect("clicked", self.on_take_screenshot)
         grid.attach(screenshot_button, 0, 4, 3, 1)
 
-        self.frame_images = []  # List to store Image objects
+        self.frame_images = []  # List to store Image objects, has to be empty
         self.current_frame = 0
-        self.video = None  # Placeholder for the loaded video
+        self.video = None  # This is a placeholder for the loaded video
         self.pixbuf_cache = []  # Cache GdkPixbuf for smoother scrolling
 
         # Status Label
         self.status_label = Gtk.Label(label="")
         vbox.pack_start(self.status_label, False, False, 0)
-        #grid.attach(self.status_label,0, 5, 3, 1) # check how to add this to the grid without messing anything up
 
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
@@ -103,9 +102,14 @@ class ScreenshotOptmizer(Gtk.Window):
         if not input_file:
             print("No input file selected.")
             return
-
-        # Load the video file
-        self.video = VideoFileClip(input_file)
+        
+        # Error handling for invalid video files
+        try:
+            self.video = VideoFileClip(input_file)
+        except Exception as e:
+            self.show_error_dialog("Error: Invalid video file selected.")
+            return
+        
         self.frame_images.clear()
         self.pixbuf_cache.clear()
 
@@ -119,6 +123,15 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_slider.set_value(0)  # Set to first frame by default
 
         self.update_frame_display(0)  # Display the first frame
+
+    def show_error_dialog(self, message):
+        dialog = Gtk.MessageDialog(
+            parent=self, flags=0, message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK, text="Input Error"
+        )
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
 
     def on_select_output_directory(self, widget):
         dialog = Gtk.FileChooserDialog(
@@ -138,12 +151,16 @@ class ScreenshotOptmizer(Gtk.Window):
         if not self.frame_images:
             return
 
-        # Convert the frame to GdkPixbuf and display
         image = self.frame_images[frame_index]
+
+        # Clear previous image from frame_area
+        for child in self.frame_area.get_children():
+            self.frame_area.remove(child)
+
         if frame_index < len(self.pixbuf_cache):
             pixbuf = self.pixbuf_cache[frame_index]
         else:
-            buffer = image.tobytes()  # Convert image to bytes for GdkPixbuf
+            buffer = image.tobytes()  # This Converts images to bytes for GdkPixbuf
             pixbuf = GdkPixbuf.Pixbuf.new_from_data(
                 buffer,
                 GdkPixbuf.Colorspace.RGB,
@@ -157,28 +174,15 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_area.add(image_widget)
         self.frame_area.show_all()
 
-    def on_take_screenshot(self, widget):
+    def on_take_screenshot(self, widget): #This operation logic can be optimized
         if not self.frame_images:
-            dialog = Gtk.MessageDialog(
-                parent=self, flags=0, message_type=Gtk.MessageType.WARNING,
-                buttons=Gtk.ButtonsType.OK, text="Input Error",
-            )
-            dialog.format_secondary_text("Error: Unsupported file type. Please select a .mp4, .webm, .mov, .avi, or .gif file.")
-            dialog.run()
-            dialog.destroy()
-            print("No frames loaded to take screenshot from.")
+            self.show_error_dialog("Error: Please select a proper video file.")
             return
 
         output_folder = self.output_entry.get_text()
+
         if not output_folder:
-            dialog = Gtk.MessageDialog(
-                parent=self, flags=0, message_type=Gtk.MessageType.WARNING,
-                buttons=Gtk.ButtonsType.OK, text="Input Error",
-            )
-            dialog.format_secondary_text("Error: Please select an output folder.")
-            dialog.run()
-            dialog.destroy()
-            print("Please select an output folder.")
+            self.show_error_dialog("Error: Please select an proper input file and/or an output folder.")
             return
 
         if not os.path.exists(output_folder):
@@ -191,7 +195,6 @@ class ScreenshotOptmizer(Gtk.Window):
         self.update_status(f"Screenshot of frame {self.current_frame} saved.")
         print(f"Screenshot of frame {self.current_frame} saved.")
 
-
 def main():
     app = ScreenshotOptmizer()
     app.connect("destroy", Gtk.main_quit)
@@ -200,3 +203,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
