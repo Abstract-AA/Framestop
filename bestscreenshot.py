@@ -63,8 +63,9 @@ class ScreenshotOptmizer(Gtk.Window):
         grid.attach(self.frame_area, 0, 2, 3, 1)
 
         # Frame selection slider
-        self.frame_slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL)
-        self.frame_slider.set_range(0, 0)  # Will be updated after frames are loaded
+        adjustment = Gtk.Adjustment(value=0, lower=0, upper=0, step_increment=1, page_increment=1)
+        self.frame_slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL,adjustment=adjustment)
+        self.frame_slider.set_digits(0)  # this makes the slider deal in integers and not floats and also will be updated as the script runs
         self.frame_slider.connect("value-changed", self.on_frame_slider_changed)
         grid.attach(self.frame_slider, 0, 3, 3, 1)
 
@@ -122,7 +123,8 @@ class ScreenshotOptmizer(Gtk.Window):
             self.frame_images.append(image)
 
         # Update the slider based on the number of frames
-        self.frame_slider.set_range(0, len(self.frame_images) - 1)
+        self.frame_slider.get_adjustment().set_lower(0)
+        self.frame_slider.get_adjustment().set_upper(len(self.frame_images) - 1)
         self.frame_slider.set_value(0)  # Set to first frame by default
 
         self.update_frame_display(0)  # Display the first frame
@@ -206,4 +208,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
