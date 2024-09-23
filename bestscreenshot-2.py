@@ -61,9 +61,25 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_slider.connect("value-changed", self.on_frame_slider_changed)
         grid.attach(self.frame_slider, 0, 3, 3, 1)
 
+        # HBox to hold checkbox and + / - buttons
+        hbox_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+
         # Checkbox for applying optimization
         self.optimize_checkbox = Gtk.CheckButton(label="Apply Screenshot Optimization")
-        grid.attach(self.optimize_checkbox, 0, 4, 3, 1)
+        #self.optimize_checkbox.connect("clicked",<aqui vai a integração com a função de otimizar o screenshot>)
+        hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
+
+        # Add frame button
+        addframe_button = Gtk.Button(label="+ one frame")
+        addframe_button.connect("clicked", self.on_add_frame)
+        hbox_controls.pack_start(addframe_button, False, False, 0)
+
+        # Remove frame button
+        removeframe_button = Gtk.Button(label="- one frame")
+        removeframe_button.connect("clicked", self.on_remove_frame)
+        hbox_controls.pack_start(removeframe_button, False, False, 0)
+
+        grid.attach(hbox_controls, 0, 4, 3, 1)
 
         self.status_label = Gtk.Label(label="")
         grid.attach(self.status_label, 0, 5, 3, 1)
@@ -77,7 +93,6 @@ class ScreenshotOptmizer(Gtk.Window):
         self.current_frame = 0
         self.video = None
         self.pixbuf_cache = []
-
         #a sidebar for further options and fine tuning adjustments could be included, consider this later
 
     def update_status(self, message):
@@ -194,6 +209,16 @@ class ScreenshotOptmizer(Gtk.Window):
 
         self.update_status(f"Screenshot of frame {self.current_frame} saved.")
         print(f"Screenshot of frame {self.current_frame} saved.")
+    
+    def on_add_frame(self, widget):
+        # Move slider value forward by 1 frame
+        current_value = self.frame_slider.get_value()
+        self.frame_slider.set_value(min(current_value + 1, len(self.frame_images) - 1))
+
+    def on_remove_frame(self, widget):
+        # Move slider value backward by 1 frame
+        current_value = self.frame_slider.get_value()
+        self.frame_slider.set_value(max(current_value - 1, 0))
 
 def main():
     app = ScreenshotOptmizer()
