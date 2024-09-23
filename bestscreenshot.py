@@ -118,7 +118,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.pixbuf_cache.clear()
 
         # Extract frames
-        for i, frame in enumerate(self.video.iter_frames(fps=1)):  # Adjust fps for fewer frames
+        for i, frame in enumerate(self.video.iter_frames()):  # Adjust fps for fewer frames
             image = Image.fromarray(frame)
             self.frame_images.append(image)
 
