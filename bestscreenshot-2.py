@@ -201,8 +201,8 @@ class ScreenshotOptmizer(Gtk.Window):
 
         if self.optimize_checkbox.get_active():
             self.update_status("Optimization placeholder applied... (logic pending)")
-            # Placeholder: Apply screenshot optimization here
-            # Future algorithm will modify `selected_frame` before saving.
+            # TODO Placeholder: Apply screenshot optimization here
+            # TODO Future algorithm will modify `selected_frame` before saving.
             pass
 
         selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
