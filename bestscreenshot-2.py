@@ -40,7 +40,7 @@ class ScreenshotOptmizer(Gtk.Window):
         input_file_button.connect("clicked", self.on_select_input_file)
         grid.attach(input_file_button, 2, 0, 1, 1)
 
-        # Output file path
+        # Output file path & button
         output_label = Gtk.Label(label="Output Folder:")
         grid.attach(output_label, 0, 1, 1, 1)
 
@@ -51,10 +51,12 @@ class ScreenshotOptmizer(Gtk.Window):
         output_directory_button.connect("clicked", self.on_select_output_directory)
         grid.attach(output_directory_button, 2, 1, 1, 1)
 
+        # This produces a scrollable window that displays the frames
         self.frame_area = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
         self.frame_area.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         grid.attach(self.frame_area, 0, 2, 3, 1)
-
+        
+        # This displays the Scrollable frame bar
         adjustment = Gtk.Adjustment(value=0, lower=0, upper=0, step_increment=1, page_increment=1)
         self.frame_slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=adjustment)
         self.frame_slider.set_digits(0)
