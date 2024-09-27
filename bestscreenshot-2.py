@@ -28,6 +28,7 @@ class ScreenshotOptmizer(Gtk.Window):
         grid.set_column_spacing(10)
         grid.set_row_spacing(10)
         vbox.pack_start(grid, True, True, 0)
+        self.frame_skip_value = 1 
 
         # Input file path
         input_label = Gtk.Label(label="Input File:")
@@ -72,14 +73,26 @@ class ScreenshotOptmizer(Gtk.Window):
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
         # Add frame button
-        addframe_button = Gtk.Button(label="+ one frame")
+        addframe_button = Gtk.Button(label="+ X frame")
         addframe_button.connect("clicked", self.on_add_frame)
         hbox_controls.pack_start(addframe_button, False, False, 0)
 
         # Remove frame button
-        removeframe_button = Gtk.Button(label="- one frame")
+        removeframe_button = Gtk.Button(label="- X frame")
         removeframe_button.connect("clicked", self.on_remove_frame)
         hbox_controls.pack_start(removeframe_button, False, False, 0)
+
+        self.status_label = Gtk.Label(label="")
+        grid.attach(self.status_label, 0, 5, 3, 1)
+
+        #Skip X frames forward or backwards 
+        self.frame_skip_spinner = Gtk.SpinButton()
+        self.frame_skip_spinner.set_range(1, 100)
+        self.frame_skip_spinner.set_increments(1, 10)
+        self.frame_skip_spinner.set_value(self.frame_skip_value)
+        self.frame_skip_spinner.connect("value-changed", self.on_frame_skip_value_changed)
+        hbox_controls.pack_start(Gtk.Label(label="Skip X frames:"), False, False, 0)
+        hbox_controls.pack_start(self.frame_skip_spinner, False, False, 0)
 
         grid.attach(hbox_controls, 0, 4, 3, 1)
 
@@ -96,6 +109,9 @@ class ScreenshotOptmizer(Gtk.Window):
         self.video = None
         self.pixbuf_cache = []
         #a sidebar for further options and fine tuning adjustments could be included, consider this later
+
+    def on_frame_skip_value_changed(self, widget):
+        self.frame_skip_value = widget.get_value_as_int()
 
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
@@ -215,12 +231,12 @@ class ScreenshotOptmizer(Gtk.Window):
     def on_add_frame(self, widget):
         # Move slider value forward by 1 frame
         current_value = self.frame_slider.get_value()
-        self.frame_slider.set_value(min(current_value + 1, len(self.frame_images) - 1))
+        self.frame_slider.set_value(min(current_value + self.frame_skip_value, len(self.frame_images) - 1))
 
     def on_remove_frame(self, widget):
         # Move slider value backward by 1 frame
         current_value = self.frame_slider.get_value()
-        self.frame_slider.set_value(max(current_value - 1, 0))
+        self.frame_slider.set_value(max(current_value - self.frame_skip_value, 0))
 
 def main():
     app = ScreenshotOptmizer()
