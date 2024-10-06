@@ -5,6 +5,7 @@ from gi.repository import Gtk, GObject, GdkPixbuf, GLib
 from moviepy.editor import VideoFileClip
 import os
 from PIL import Image
+from basic_colormath import get_delta_e
 
 if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.Resampling.LANCZOS  # Ensure compatibility with Pillow 10.x
@@ -20,6 +21,9 @@ class ScreenshotOptmizer(Gtk.Window):
         self.set_border_width(10)
         self.set_default_size(800, 600)
         self.output_auto = True  # Automatically assign input folder to output folder by default
+        self.frame_skip_value = 1
+        self.frame_analysis_value=5
+        self.threshold = 0.5
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.add(vbox)
@@ -220,18 +224,52 @@ class ScreenshotOptmizer(Gtk.Window):
             os.makedirs(output_folder)
 
         selected_frame = self.frame_images[self.current_frame]
-
         if self.optimize_checkbox.get_active():
             self.update_status("Optimization placeholder applied... (logic pending)")
-            # TODO Placeholder: Apply screenshot optimization here
-            # TODO Future algorithm will modify `selected_frame` before saving.
-            pass
+            selected_frame = self.getBestFrame()
+            
 
+        
         selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
 
         self.update_status(f"Screenshot of frame {self.current_frame} saved.")
         print(f"Screenshot of frame {self.current_frame} saved.")
+
+    def neighbour_pixel_values(self,loaded_img, x,y):
+        cima = loaded_img[x,y-1]
+        direita = loaded_img[x+1, y]
+        baixo = loaded_img[x, y+1]
+        esquerda = loaded_img[x-1, y]
+        return [cima, direita, baixo, esquerda]
+
+    def imageRating(self,img):
+        largura, altura = img.size
+        loaded_img = img.load()
+        mudancas = 0
+        for linha in range(1, altura-1):
+            for coluna in range(1, largura-1):
+                if (linha%2 == 0 and coluna%2 == 0) or (linha%2 == 1 and coluna%2 == 1):
+                    for pixel in self.neighbour_pixel_values(loaded_img, coluna, linha):
+                        dE = get_delta_e(loaded_img[coluna, linha], pixel)
+                        if dE > self.threshold:
+                            mudancas += round(dE, 2)
+        return mudancas*2/(largura*altura) #como estamos filtrando metade dos pixels, multiplicamos por 2
     
+    def getBestFrame(self):
+        # FIXME erro ao mudar o numero de frames analisados
+        if self.frame_analysis_value % 2 == 0:
+            self.frame_analysis_value += 1
+        middle_index = self.frame_analysis_value // 2
+        frames_to_analyze_array = [(self.current_frame + i - middle_index) % len(self.frame_images) for i in range(self.frame_analysis_value)]
+        ratings = {}
+        for frame_index in frames_to_analyze_array:
+            copia = self.frame_images[frame_index].copy()
+            copia.thumbnail((100,100))
+            ratings[frame_index] = self.imageRating(copia)
+        best_frame_index = max(ratings, key=ratings.get)
+        print(f"Best frame at {best_frame_index}th frame ({abs(self.current_frame - best_frame_index)} frames away)")
+        return self.frame_images[best_frame_index]
+
     def on_add_frame(self, widget):
         # Move slider value forward by 1 frame
         current_value = self.frame_slider.get_value()
@@ -259,7 +297,14 @@ class ScreenshotOptmizer(Gtk.Window):
         self.autoassignfoldercb.connect("toggled", self.on_toggle_auto_output_folder)
         vbox.pack_start(self.autoassignfoldercb, True, False, 0)
 
+        # setting to set the number of frames to analyze
+        frame_analysis_label = Gtk.Label(label="Frames to analysis:")
+        vbox.pack_start(frame_analysis_label, True, False, 0)
 
+        self.frame_analysis_adj = Gtk.Adjustment(value=5, lower=1, upper=100, step_increment=1, page_increment=10, page_size=0)
+        self.frame_analysis_spin = Gtk.SpinButton(adjustment=self.frame_analysis_adj)
+        self.frame_analysis_spin.connect("value-changed", self.on_frame_analysis_value_changed)
+        vbox.pack_start(self.frame_analysis_spin, True, False, 0)
         #TODO add the screenshot configurations here
 
         # Show the dialog with its contents
@@ -273,6 +318,10 @@ class ScreenshotOptmizer(Gtk.Window):
     def on_toggle_auto_output_folder(self, widget):
         self.output_auto = widget.get_active()
         print(f"Automatic output folder selection: {self.output_auto}")
+
+    def on_frame_analysis_value_changed(self, widget):
+        self.frame_analysis_value = widget.get_value()
+        print(f"Frames to analyze: {self.frame_analysis_value}")
 
 def main():
     app = ScreenshotOptmizer()
