@@ -33,7 +33,7 @@ class ScreenshotOptmizer(Gtk.Window):
         grid.set_column_spacing(10)
         grid.set_row_spacing(10)
         vbox.pack_start(grid, True, True, 0)
-        self.frame_skip_value = 1 
+        self.frame_skip_value = 1
 
         # Input file path
         input_label = Gtk.Label(label="Input File:")
@@ -85,7 +85,7 @@ class ScreenshotOptmizer(Gtk.Window):
         removeframe_button.connect("clicked", self.on_remove_frame)
         hbox_controls.pack_start(removeframe_button, False, False, 0)
 
-        #Skip X frames forward or backwards 
+        #Skip X frames forward or backwards
         self.frame_skip_spinner = Gtk.SpinButton()
         self.frame_skip_spinner.set_range(1, 100)
         self.frame_skip_spinner.set_increments(1, 10)
@@ -146,7 +146,7 @@ class ScreenshotOptmizer(Gtk.Window):
         except Exception as e:
             self.show_error_dialog("Error: Invalid video file selected.")
             return
-        
+
         self.frame_images.clear()
         self.pixbuf_cache.clear()
 
@@ -178,7 +178,7 @@ class ScreenshotOptmizer(Gtk.Window):
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
                 self.output_entry.set_text(dialog.get_filename())
-            dialog.destroy()    
+            dialog.destroy()
 
     def on_frame_slider_changed(self, widget):
         self.current_frame = int(self.frame_slider.get_value())
@@ -225,15 +225,16 @@ class ScreenshotOptmizer(Gtk.Window):
 
         selected_frame = self.frame_images[self.current_frame]
         if self.optimize_checkbox.get_active():
+            old_frame = self.current_frame
             self.update_status("Optimization placeholder applied... (logic pending)")
-            selected_frame = self.getBestFrame()
-            
-
-        
-        selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
-
-        self.update_status(f"Screenshot of frame {self.current_frame} saved.")
-        print(f"Screenshot of frame {self.current_frame} saved.")
+            selected_frame, self.current_frame = self.getBestFrame()
+            selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
+            self.update_status(f"Screenshot saved. Best frame at {self.current_frame}th frame ({abs(old_frame - self.current_frame)} frame{'s' if abs(old_frame - self.current_frame) != 1 else ''} away)")
+            #TODO mover preview para o frame atual
+        else:
+            selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
+            self.update_status(f"Screenshot of frame {self.current_frame} saved.")
+            print(f"Screenshot of frame {self.current_frame} saved.")
 
     def neighbour_pixel_values(self,loaded_img, x,y):
         cima = loaded_img[x,y-1]
@@ -254,21 +255,20 @@ class ScreenshotOptmizer(Gtk.Window):
                         if dE > self.threshold:
                             mudancas += round(dE, 2)
         return mudancas*2/(largura*altura) #como estamos filtrando metade dos pixels, multiplicamos por 2
-    
+
     def getBestFrame(self):
-        # FIXME erro ao mudar o numero de frames analisados
-        if self.frame_analysis_value % 2 == 0:
-            self.frame_analysis_value += 1
-        middle_index = self.frame_analysis_value // 2
-        frames_to_analyze_array = [(self.current_frame + i - middle_index) % len(self.frame_images) for i in range(self.frame_analysis_value)]
+        #TODO melhorar range de frames quando está perto do início ou fim
+        half_frames = self.frame_analysis_value // 2
+        start_frame = int(max(0, self.current_frame - half_frames))
+        end_frame = int(min(len(self.frame_images), self.current_frame + half_frames))
+        frames_to_analyze_array = list(range(start_frame, end_frame))
         ratings = {}
         for frame_index in frames_to_analyze_array:
             copia = self.frame_images[frame_index].copy()
             copia.thumbnail((100,100))
             ratings[frame_index] = self.imageRating(copia)
         best_frame_index = max(ratings, key=ratings.get)
-        print(f"Best frame at {best_frame_index}th frame ({abs(self.current_frame - best_frame_index)} frames away)")
-        return self.frame_images[best_frame_index]
+        return [self.frame_images[best_frame_index], best_frame_index]
 
     def on_add_frame(self, widget):
         # Move slider value forward by 1 frame
@@ -305,7 +305,6 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_analysis_spin = Gtk.SpinButton(adjustment=self.frame_analysis_adj)
         self.frame_analysis_spin.connect("value-changed", self.on_frame_analysis_value_changed)
         vbox.pack_start(self.frame_analysis_spin, True, False, 0)
-        #TODO add the screenshot configurations here
 
         # Show the dialog with its contents
         dialog.show_all()
