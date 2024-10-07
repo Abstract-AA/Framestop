@@ -115,6 +115,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.pixbuf_cache = []
 
         #a sidebar for further options and fine tuning adjustments could be included, consider this later
+        # TODO add functionality of copying screenshot directly to clipboard
 
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
