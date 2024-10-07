@@ -5,3 +5,4 @@ include
 pyvenv.cfg
 etc
 share
+.ipynb_checkpoints/
