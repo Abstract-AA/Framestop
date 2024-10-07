@@ -352,6 +352,10 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_analysis_spin.set_size_request(10,10)  # Adjust this value to control the width
         grid2.attach(self.frame_analysis_spin, 1, 1, 1, 1)  # Right column, same row as label (1)
 
+        self.frame_analysis_adj = Gtk.Adjustment(value=5, lower=1, upper=100, step_increment=1, page_increment=10, page_size=0)
+        self.frame_analysis_spin = Gtk.SpinButton(adjustment=self.frame_analysis_adj)
+        self.frame_analysis_spin.connect("value-changed", self.on_frame_analysis_value_changed)
+        vbox.pack_start(self.frame_analysis_spin, True, False, 0)
         #TODO add the screenshot configurations here
 
         # Show the dialog with its contents
