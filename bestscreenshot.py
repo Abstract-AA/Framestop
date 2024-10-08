@@ -256,15 +256,16 @@ class ScreenshotOptmizer(Gtk.Window):
 
         selected_frame = self.frame_images[self.current_frame]
         if self.optimize_checkbox.get_active():
-            self.update_status("Optimization placeholder applied... (logic pending)")
-            selected_frame = self.getBestFrame()
-            
-
-        
-        selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
-
-        self.update_status(f"Screenshot of frame {self.current_frame} saved.")
-        print(f"Screenshot of frame {self.current_frame} saved.")
+            old_frame = self.current_frame
+            self.update_status("Searching for the best frames...")
+            selected_frame, self.current_frame = self.getBestFrame()
+            selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
+            self.update_status(f"Screenshot saved. Best frame at {self.current_frame}th frame ({abs(old_frame - self.current_frame)} frame{'s' if abs(old_frame - self.current_frame) != 1 else ''} away)")
+            #TODO mover preview para o frame atual
+        else:
+            selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
+            self.update_status(f"Screenshot of frame {self.current_frame} saved.")
+            print(f"Screenshot of frame {self.current_frame} saved.")
 
     def neighbour_pixel_values(self,loaded_img, x,y):
         cima = loaded_img[x,y-1]
@@ -287,19 +288,18 @@ class ScreenshotOptmizer(Gtk.Window):
         return mudancas*2/(largura*altura) #como estamos filtrando metade dos pixels, multiplicamos por 2
     
     def getBestFrame(self):
-        # FIXME erro ao mudar o numero de frames analisados
-        if self.frame_analysis_value % 2 == 0:
-            self.frame_analysis_value += 1
-        middle_index = self.frame_analysis_value // 2
-        frames_to_analyze_array = [(self.current_frame + i - middle_index) % len(self.frame_images) for i in range(self.frame_analysis_value)]
+        #TODO melhorar range de frames quando está perto do início ou fim
+        half_frames = self.frame_analysis_value // 2
+        start_frame = int(max(0, self.current_frame - half_frames))
+        end_frame = int(min(len(self.frame_images), self.current_frame + half_frames))
+        frames_to_analyze_array = list(range(start_frame, end_frame))
         ratings = {}
         for frame_index in frames_to_analyze_array:
             copia = self.frame_images[frame_index].copy()
             copia.thumbnail((100,100))
             ratings[frame_index] = self.imageRating(copia)
         best_frame_index = max(ratings, key=ratings.get)
-        print(f"Best frame at {best_frame_index}th frame ({abs(self.current_frame - best_frame_index)} frames away)")
-        return self.frame_images[best_frame_index]
+        return [self.frame_images[best_frame_index], best_frame_index]
 
     def on_add_frame(self, widget):
         # Move slider value forward by 1 frame
@@ -351,6 +351,21 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_analysis_spin.set_halign(Gtk.Align.CENTER)  # Align to the right of the cell
         self.frame_analysis_spin.set_size_request(10,10)  # Adjust this value to control the width
         grid2.attach(self.frame_analysis_spin, 1, 1, 1, 1)  # Right column, same row as label (1)
+
+        # Label for threshold range
+        threshold_label = Gtk.Label(label="Frame selection Threshold:")
+        grid2.attach(threshold_label, 0, 2, 1, 1)  
+
+        # SpinButton to set the threshold range
+        self.threshold_adj = Gtk.Adjustment(value=5, lower=1, upper=10, step_increment=1, page_increment=10, page_size=0)
+        self.threshold_spin = Gtk.SpinButton(adjustment=self.threshold_adj)
+        self.threshold_spin.connect("value-changed", self.on_threshold_value_changed)
+
+        self.threshold_spin.set_halign(Gtk.Align.CENTER)  # Center it
+        self.threshold_spin.set_size_request(100, 10)  # Adjust width as needed
+        grid2.attach(self.threshold_spin, 1, 2, 1, 1)  # Attach the spin button
+
+
         #TODO add the screenshot configurations here
 
         # Show the dialog with its contents
@@ -368,6 +383,10 @@ class ScreenshotOptmizer(Gtk.Window):
     def on_frame_analysis_value_changed(self, widget):
         self.frame_analysis_value = widget.get_value()
         print(f"Frames to analyze: {self.frame_analysis_value}")
+    
+    def on_threshold_value_changed(self, widget):
+        self.threshold_value = widget.get_value()/10
+        print(f"Threshold set at: {self.threshold_value}")
 
 def main():
     app = ScreenshotOptmizer()
