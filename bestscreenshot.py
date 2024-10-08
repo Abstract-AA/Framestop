@@ -256,15 +256,16 @@ class ScreenshotOptmizer(Gtk.Window):
 
         selected_frame = self.frame_images[self.current_frame]
         if self.optimize_checkbox.get_active():
-            self.update_status("Optimization placeholder applied... (logic pending)")
-            selected_frame = self.getBestFrame()
-            
-
-        
-        selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
-
-        self.update_status(f"Screenshot of frame {self.current_frame} saved.")
-        print(f"Screenshot of frame {self.current_frame} saved.")
+            old_frame = self.current_frame
+            self.update_status("Searching for the best frames...")
+            selected_frame, self.current_frame = self.getBestFrame()
+            selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
+            self.update_status(f"Screenshot saved. Best frame at {self.current_frame}th frame ({abs(old_frame - self.current_frame)} frame{'s' if abs(old_frame - self.current_frame) != 1 else ''} away)")
+            #TODO mover preview para o frame atual
+        else:
+            selected_frame.save(os.path.join(output_folder, f"frame_{self.current_frame}.jpg"))
+            self.update_status(f"Screenshot of frame {self.current_frame} saved.")
+            print(f"Screenshot of frame {self.current_frame} saved.")
 
     def neighbour_pixel_values(self,loaded_img, x,y):
         cima = loaded_img[x,y-1]
@@ -287,19 +288,18 @@ class ScreenshotOptmizer(Gtk.Window):
         return mudancas*2/(largura*altura) #como estamos filtrando metade dos pixels, multiplicamos por 2
     
     def getBestFrame(self):
-        # FIXME erro ao mudar o numero de frames analisados
-        if self.frame_analysis_value % 2 == 0:
-            self.frame_analysis_value += 1
-        middle_index = self.frame_analysis_value // 2
-        frames_to_analyze_array = [(self.current_frame + i - middle_index) % len(self.frame_images) for i in range(self.frame_analysis_value)]
+        #TODO melhorar range de frames quando está perto do início ou fim
+        half_frames = self.frame_analysis_value // 2
+        start_frame = int(max(0, self.current_frame - half_frames))
+        end_frame = int(min(len(self.frame_images), self.current_frame + half_frames))
+        frames_to_analyze_array = list(range(start_frame, end_frame))
         ratings = {}
         for frame_index in frames_to_analyze_array:
             copia = self.frame_images[frame_index].copy()
             copia.thumbnail((100,100))
             ratings[frame_index] = self.imageRating(copia)
         best_frame_index = max(ratings, key=ratings.get)
-        print(f"Best frame at {best_frame_index}th frame ({abs(self.current_frame - best_frame_index)} frames away)")
-        return self.frame_images[best_frame_index]
+        return [self.frame_images[best_frame_index], best_frame_index]
 
     def on_add_frame(self, widget):
         # Move slider value forward by 1 frame
