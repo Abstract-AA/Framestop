@@ -14,7 +14,7 @@ if not Gtk.init_check():
     print("Failed to initialize GTK.")
     exit(1)
 
-class ScreenshotOptmizer(Gtk.Window):
+class ScreenshotOptimizer(Gtk.Window):
 
     def __init__(self):
         super().__init__(title="Screenshot Optimizer")
@@ -389,7 +389,7 @@ class ScreenshotOptmizer(Gtk.Window):
         print(f"Threshold set at: {self.threshold_value}")
 
 def main():
-    app = ScreenshotOptmizer()
+    app = ScreenshotOptimizer()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
     Gtk.main()
