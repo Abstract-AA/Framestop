@@ -351,6 +351,21 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_analysis_spin.set_halign(Gtk.Align.CENTER)  # Align to the right of the cell
         self.frame_analysis_spin.set_size_request(10,10)  # Adjust this value to control the width
         grid2.attach(self.frame_analysis_spin, 1, 1, 1, 1)  # Right column, same row as label (1)
+
+        # Label for threshold range
+        threshold_label = Gtk.Label(label="Frame selection Threshold:")
+        grid2.attach(threshold_label, 0, 2, 1, 1)  
+
+        # SpinButton to set the threshold range
+        self.threshold_adj = Gtk.Adjustment(value=5, lower=1, upper=10, step_increment=1, page_increment=10, page_size=0)
+        self.threshold_spin = Gtk.SpinButton(adjustment=self.threshold_adj)
+        self.threshold_spin.connect("value-changed", self.on_threshold_value_changed)
+
+        self.threshold_spin.set_halign(Gtk.Align.CENTER)  # Center it
+        self.threshold_spin.set_size_request(100, 10)  # Adjust width as needed
+        grid2.attach(self.threshold_spin, 1, 2, 1, 1)  # Attach the spin button
+
+
         #TODO add the screenshot configurations here
 
         # Show the dialog with its contents
@@ -368,6 +383,10 @@ class ScreenshotOptmizer(Gtk.Window):
     def on_frame_analysis_value_changed(self, widget):
         self.frame_analysis_value = widget.get_value()
         print(f"Frames to analyze: {self.frame_analysis_value}")
+    
+    def on_threshold_value_changed(self, widget):
+        self.threshold_value = widget.get_value()/10
+        print(f"Threshold set at: {self.threshold_value}")
 
 def main():
     app = ScreenshotOptmizer()
