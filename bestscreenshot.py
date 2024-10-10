@@ -23,7 +23,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.output_auto = True  # Automatically assign input folder to output folder by default
         self.frame_skip_value = 1
         self.frame_analysis_value=5
-        self.threshold = 0.5
+        self.threshold = 5
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.add(vbox)
@@ -320,7 +320,7 @@ class ScreenshotOptmizer(Gtk.Window):
         content_area = dialog.get_content_area()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         content_area.pack_start(vbox, False, False, 0)
-        dialog.set_default_size(400, 350)
+        dialog.set_default_size(420, 180)
 
         # Create the grid
         grid2 = Gtk.Grid()
@@ -344,7 +344,7 @@ class ScreenshotOptmizer(Gtk.Window):
         grid2.attach(frame_analysis_label, 0, 1, 1, 1)  # Next row
 
         # SpinButton to set the frame analysis range
-        self.frame_analysis_adj = Gtk.Adjustment(value=5, lower=1, upper=100, step_increment=1, page_increment=10, page_size=0)
+        self.frame_analysis_adj = Gtk.Adjustment(value=self.frame_analysis_value, lower=1, upper=100, step_increment=1, page_increment=10, page_size=0)
         self.frame_analysis_spin = Gtk.SpinButton(adjustment=self.frame_analysis_adj)
         self.frame_analysis_spin.connect("value-changed", self.on_frame_analysis_value_changed)
 
@@ -357,7 +357,7 @@ class ScreenshotOptmizer(Gtk.Window):
         grid2.attach(threshold_label, 0, 2, 1, 1)  
 
         # SpinButton to set the threshold range
-        self.threshold_adj = Gtk.Adjustment(value=5, lower=1, upper=10, step_increment=1, page_increment=10, page_size=0)
+        self.threshold_adj = Gtk.Adjustment(value=self.threshold, lower=1, upper=10, step_increment=1, page_increment=10, page_size=0)
         self.threshold_spin = Gtk.SpinButton(adjustment=self.threshold_adj)
         self.threshold_spin.connect("value-changed", self.on_threshold_value_changed)
 
@@ -374,6 +374,10 @@ class ScreenshotOptmizer(Gtk.Window):
         # Wait for user response (OK or Cancel)
         response = dialog.run()
 
+        if response == Gtk.ResponseType.OK:
+            self.frame_analysis_value = self.frame_analysis_spin.get_value_as_int()
+            self.threshold = self.threshold_spin.get_value_as_int()
+
         dialog.destroy()
 
     def on_toggle_auto_output_folder(self, widget):
@@ -385,7 +389,7 @@ class ScreenshotOptmizer(Gtk.Window):
         print(f"Frames to analyze: {self.frame_analysis_value}")
     
     def on_threshold_value_changed(self, widget):
-        self.threshold_value = widget.get_value()/10
+        self.threshold_value = (widget.get_value())/10
         print(f"Threshold set at: {self.threshold_value}")
 
 def main():
