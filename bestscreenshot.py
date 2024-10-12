@@ -69,10 +69,10 @@ class ScreenshotOptmizer(Gtk.Window):
 
         # HBox to hold checkbox and + / - buttons
         hbox_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_controls.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
 
         # Checkbox for applying optimization
         self.optimize_checkbox = Gtk.CheckButton(label="Apply Screenshot Optimization")
-        #self.optimize_checkbox.connect("clicked",<aqui vai a integração com a função de otimizar o screenshot>)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
         # Add frame button
@@ -364,8 +364,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.threshold_spin.set_halign(Gtk.Align.CENTER)  # Center it
         self.threshold_spin.set_size_request(100, 10)  # Adjust width as needed
         grid2.attach(self.threshold_spin, 1, 2, 1, 1)  # Attach the spin button
-
-
+        
         #TODO add the screenshot configurations here
 
         # Show the dialog with its contents
