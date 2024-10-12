@@ -73,6 +73,7 @@ class ScreenshotOptmizer(Gtk.Window):
 
         # Checkbox for applying optimization
         self.optimize_checkbox = Gtk.CheckButton(label="Apply Screenshot Optimization")
+        self.optimize_checkbox.set_active(True)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
         # Add frame button
