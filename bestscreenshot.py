@@ -79,14 +79,14 @@ class ScreenshotOptmizer(Gtk.Window):
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
         # Add frame button
-        addframe_button = Gtk.Button(label="+ X frame(s)")
-        addframe_button.connect("clicked", self.on_add_frame)
-        hbox_controls.pack_start(addframe_button, False, False, 0)
+        self.addframe_button = Gtk.Button(label="+ 1 frame")
+        self.addframe_button.connect("clicked", self.on_add_frame)
+        hbox_controls.pack_start(self.addframe_button, False, False, 0)
 
         # Remove frame button
-        removeframe_button = Gtk.Button(label="- X frame(s)")
-        removeframe_button.connect("clicked", self.on_remove_frame)
-        hbox_controls.pack_start(removeframe_button, False, False, 0)
+        self.removeframe_button = Gtk.Button(label="- 1 frame")
+        self.removeframe_button.connect("clicked", self.on_remove_frame)
+        hbox_controls.pack_start(self.removeframe_button, False, False, 0)
 
         #Skip X frames forward or backwards 
         self.frame_skip_spinner = Gtk.SpinButton()
@@ -183,6 +183,13 @@ class ScreenshotOptmizer(Gtk.Window):
 
     def on_frame_skip_value_changed(self, widget):
         self.frame_skip_value = widget.get_value_as_int()
+        if self.frame_skip_value == 1:
+            self.removeframe_button.set_label(f"- {self.frame_skip_value} frame")
+            self.addframe_button.set_label(f"+ {self.frame_skip_value} frame")
+        else:
+            self.removeframe_button.set_label(f"- {self.frame_skip_value} frames")
+            self.addframe_button.set_label(f"+ {self.frame_skip_value} frames")
+        
 
     def on_select_input_file(self, widget):
         self.clearall(widget) #isso é importante pra caso o usuário selecione um arquivo depois do outro
