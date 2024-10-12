@@ -162,6 +162,8 @@ class ScreenshotOptmizer(Gtk.Window):
 
         # Get the current frame image (PIL.Image object)
         selected_frame = self.frame_images[self.current_frame]
+        if self.optimize_checkbox.get_active():
+            selected_frame, self.current_frame = self.getBestFrame()
 
         # Convert the PIL Image to a GdkPixbuf object
         buffer = selected_frame.tobytes()
