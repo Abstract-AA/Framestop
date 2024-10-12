@@ -4,6 +4,8 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, GdkPixbuf, GLib, Gdk
 from moviepy.editor import VideoFileClip
 import os
+import time
+import threading
 from PIL import Image
 from basic_colormath import get_delta_e
 
@@ -72,7 +74,8 @@ class ScreenshotOptmizer(Gtk.Window):
         hbox_controls.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
 
         # Checkbox for applying optimization
-        self.optimize_checkbox = Gtk.CheckButton(label="Apply Screenshot Optimization")
+        self.optimize_checkbox = Gtk.CheckButton(label="Apply Optimization")
+        self.optimize_checkbox.set_active(True)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
         # Add frame button
@@ -99,6 +102,11 @@ class ScreenshotOptmizer(Gtk.Window):
         copytoclip_button.connect("clicked", self.copytoclip)
         hbox_controls.pack_start(copytoclip_button, False, False, 0)
 
+        # Copy current frame to clipboard button next to the frame buttons
+        clearall_button = Gtk.Button(label="Clear all inputs")
+        clearall_button.connect("clicked", self.clearall)
+        hbox_controls.pack_start(clearall_button, False, False, 0)
+
         # Settings button next to the frame buttons
         settings_button = Gtk.Button(label="Settings")
         settings_button.connect("clicked", self.on_open_settings)
@@ -118,16 +126,38 @@ class ScreenshotOptmizer(Gtk.Window):
         self.current_frame = 0
         self.video = None
         self.pixbuf_cache = []
+        self.loading_animation_id = None
+
+        # Add loading label (for the "Loading frames..." message)
+        self.loading_label = Gtk.Label(label="")
+        grid.attach(self.loading_label, 0, 2, 3, 1)
 
         #a sidebar for further options and fine tuning adjustments could be included, consider this later
-        # TODO add functionality of copying screenshot directly to clipboard
-
+        
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
+
+    def clearall(self,widget):  # This is meant to essentially bring the program back to its base state
+        self.frame_images = []
+        self.current_frame = 0
+        self.video = None
+        self.pixbuf_cache = []
+        self.input_entry.set_text("")
+        self.output_entry.set_text("")
+        for child in self.frame_area.get_children():
+            self.frame_area.remove(child)
+        self.frame_slider.set_value(0)
+        adjustment = self.frame_slider.get_adjustment()
+        adjustment.set_lower(0)
+        adjustment.set_upper(0)
+        self.status_label.set_text("")
+        self.frame_skip_spinner.set_value(1)     # Reset the spinner to its default value
+        self.stop_loading_animation()
 
     def copytoclip(self,widget):
         if not self.frame_images:
             self.show_error_dialog("Error: No frame to copy. Load a video first.")
+            self.stop_loading_animation()
             return
 
         # Get the current frame image (PIL.Image object)
@@ -155,6 +185,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_skip_value = widget.get_value_as_int()
 
     def on_select_input_file(self, widget):
+        self.clearall(widget) #isso é importante pra caso o usuário selecione um arquivo depois do outro
         dialog = Gtk.FileChooserDialog(
             title="Select Input File", parent=self, action=Gtk.FileChooserAction.OPEN
         )
@@ -164,19 +195,48 @@ class ScreenshotOptmizer(Gtk.Window):
             input_file_path = dialog.get_filename()
             self.input_entry.set_text(input_file_path)
             self.input_directory = os.path.dirname(input_file_path)
+            self.start_loading_animation()
+            # Load video frames in a separate thread to avoid freezing
+            thread = threading.Thread(target=self.load_video_frames, args=(input_file_path,))
+            thread.start()
             if self.output_auto:
                 self.output_entry.set_text(self.input_directory)
-            self.load_video_frames(input_file_path)
+
         dialog.destroy()
+
+    def start_loading_animation(self):
+        self.loading_dots = 0
+
+        def animate_loading():
+            dots = "." * (self.loading_dots % 4)
+            GLib.idle_add(self.loading_label.set_text, f"Loading frames{dots}")
+            self.loading_dots += 1
+            return True
+
+        # Start the animation with a 500ms interval
+        self.loading_animation_id = GLib.timeout_add(500, animate_loading)
+
+    def stop_loading_animation(self):
+        if self.loading_animation_id:
+            GLib.source_remove(self.loading_animation_id)
+            self.loading_animation_id = None
+        self.loading_label.set_text("")  # Clear the loading label    
+
+    def load_video_frames(self, input_file_path):
+        time.sleep(5)  # Simulate a long operation; remove or modify this in real usage
+        # Once loading is done, update the UI
+        GLib.idle_add(self.on_frames_loaded)
 
     def load_video_frames(self, input_file):
         if not input_file:
             print("No input file selected.")
+            self.stop_loading_animation()
             return
         try:
             self.video = VideoFileClip(input_file)
         except Exception as e:
             self.show_error_dialog("Error: Invalid video file selected.")
+            self.stop_loading_animation()
             return
         
         self.frame_images.clear()
@@ -189,7 +249,6 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_slider.get_adjustment().set_lower(0)
         self.frame_slider.get_adjustment().set_upper(len(self.frame_images) - 1)
         self.frame_slider.set_value(0)
-
         self.update_frame_display(0)
 
     def show_error_dialog(self, message):
@@ -213,15 +272,34 @@ class ScreenshotOptmizer(Gtk.Window):
 
     def on_frame_slider_changed(self, widget):
         self.current_frame = int(self.frame_slider.get_value())
+    
+        # Get the current scroll positions (horizontal and vertical adjustments)
+        hadjustment = self.frame_area.get_hadjustment()
+        vadjustment = self.frame_area.get_vadjustment()
+    
+        hvalue = hadjustment.get_value()
+        vvalue = vadjustment.get_value()
+
+        # Update the frame display
         self.update_frame_display(self.current_frame)
+
+        # Restore the scroll positions
+        hadjustment.set_value(hvalue)
+        vadjustment.set_value(vvalue)
 
     def update_frame_display(self, frame_index):
         if not self.frame_images:
             return
+
         image = self.frame_images[frame_index]
 
-        for child in self.frame_area.get_children():
-            self.frame_area.remove(child)
+        # Retrieve the Gtk.Viewport and its child (the Gtk.Image)
+        viewport = self.frame_area.get_child()  # Get the Gtk.Viewport inside the ScrolledWindow
+        if viewport and viewport.get_children():
+            image_widget = viewport.get_children()[0]  # The Gtk.Image inside the Viewport
+        else:
+            image_widget = Gtk.Image()
+            self.frame_area.add(image_widget)
 
         if frame_index < len(self.pixbuf_cache):
             pixbuf = self.pixbuf_cache[frame_index]
@@ -235,9 +313,8 @@ class ScreenshotOptmizer(Gtk.Window):
                 image.width * 3
             )
             self.pixbuf_cache.append(pixbuf)
-
-        image_widget = Gtk.Image.new_from_pixbuf(pixbuf)
-        self.frame_area.add(image_widget)
+        # Update the image widget instead of removing and re-adding it
+        image_widget.set_from_pixbuf(pixbuf)
         self.frame_area.show_all()
 
     def on_take_screenshot(self, widget):
