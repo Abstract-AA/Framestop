@@ -319,6 +319,7 @@ class ScreenshotOptmizer(Gtk.Window):
         # Get the content area of the dialog
         content_area = dialog.get_content_area()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        vbox.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
         content_area.pack_start(vbox, False, False, 0)
         dialog.set_default_size(420, 180)
 
