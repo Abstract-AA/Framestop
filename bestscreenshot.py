@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GObject, GdkPixbuf, GLib, Gdk
+from gi.repository import Gtk, GObject, GdkPixbuf, GLib, Gdk, Rsvg
 from moviepy.editor import VideoFileClip
 import os
 import time
@@ -201,7 +201,7 @@ class ScreenshotOptmizer(Gtk.Window):
         
 
     def on_select_input_file(self, widget):
-        self.clearall(widget) #isso é importante pra caso o usuário selecione um arquivo depois do outro
+        self.clearall(widget) # This makes sure that repetaed inputs activate the loading animation 
         dialog = Gtk.FileChooserDialog(
             title="Select Input File", parent=self, action=Gtk.FileChooserAction.OPEN
         )
@@ -488,27 +488,55 @@ class ScreenshotOptmizer(Gtk.Window):
         dialog.destroy()
 
     def on_about_button_clicked(self, widget):
+         # Create the About dialog
         about_dialog = Gtk.Dialog(title="About Screenshot Optimizer", transient_for=self, flags=0)
-        about_dialog.set_default_size(220, 220)
+        about_dialog.set_default_size(400, 400)  # Adjust size to fit the icon and text
         about_dialog.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+
+        # Create a vertical box to hold both the icon and the text
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox.set_halign(Gtk.Align.CENTER)  # Center the contents horizontally
+
+        # Load the SVG icon
+        icon_path = "best-screenshot-icon.svg"  # Update with your SVG icon path
+        try:
+            handle = Rsvg.Handle.new_from_file(icon_path)  # Load the SVG file
+            # Create a pixbuf from the SVG handle
+            svg_dimensions = handle.get_dimensions()
+            icon_pixbuf = handle.get_pixbuf()
+        
+            # Create an image from the pixbuf
+            icon_image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
+            icon_image.set_halign(Gtk.Align.CENTER)  # Center the icon
+            vbox.pack_start(icon_image, False, False, 0)
+        except Exception as e:
+            print(f"Error loading SVG: {e}")
+            # Handle error if the SVG cannot be loaded
+            icon_image = Gtk.Label(label="(Error loading SVG)")
+            icon_image.set_halign(Gtk.Align.CENTER)
+            vbox.pack_start(icon_image, False, False, 0)
+
         # Create a label with information about the program
         about_label = Gtk.Label(label=(
-            "\n"
-            "   This program is a screenshot tool that allows for the automatic selection of the clearer frame in a video or gif.  \n\n "
-            "   Usage:\n   "
-            "    1. Select an input video file.\n    "
-            "   2. Set the frame skip value and optimization settings.\n    "
-            "   3. Use the slider to navigate through frames and take screenshots.\n    "
-            "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
-            "   In the Settings menu, the threshold value is .... Jala manda aquela especificada monstra aqui pfpf\n\n   "
-            "   Version 1.0. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
+        "\n"
+        "   This program is a screenshot tool that allows for the automatic selection of the clearer frame in a video or gif.  \n\n "
+        "   Usage:\n   "
+        "    1. Select an input video file.\n    "
+        "   2. Set the frame skip value and optimization settings.\n    "
+        "   3. Use the slider to navigate through frames and take screenshots.\n    "
+        "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
+        "   In the Settings menu, the threshold value is .... Jala manda aquela especificada monstra aqui pfpf\n\n   "
+        "   Version 1.0. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
         ))
-        about_label.set_justify(Gtk.Justification.LEFT)  # Center the text justification
+        about_label.set_justify(Gtk.Justification.LEFT)
         about_label.set_halign(Gtk.Align.CENTER)
 
-        # Add the label to the content area
+        # Add the label to the vertical box below the icon
+        vbox.pack_start(about_label, True, True, 0)
+
+        # Add the vbox to the content area of the dialog
         about_content_area = about_dialog.get_content_area()
-        about_content_area.pack_start(about_label, True, True, 0)
+        about_content_area.pack_start(vbox, True, True, 10)  # Add some padding for a cleaner look
 
         # Show all components
         about_dialog.show_all()
@@ -516,6 +544,7 @@ class ScreenshotOptmizer(Gtk.Window):
         # Run the dialog and wait for response
         about_dialog.run()
         about_dialog.destroy()
+
 
     def on_toggle_auto_output_folder(self, widget):
         self.output_auto = widget.get_active()
