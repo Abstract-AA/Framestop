@@ -72,7 +72,7 @@ class ScreenshotOptmizer(Gtk.Window):
         hbox_controls.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
 
         # Checkbox for applying optimization
-        self.optimize_checkbox = Gtk.CheckButton(label="Apply Screenshot Optimization")
+        self.optimize_checkbox = Gtk.CheckButton(label="Apply Optimization")
         self.optimize_checkbox.set_active(True)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
