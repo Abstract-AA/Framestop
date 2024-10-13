@@ -88,15 +88,6 @@ class ScreenshotOptmizer(Gtk.Window):
         self.removeframe_button.connect("clicked", self.on_remove_frame)
         hbox_controls.pack_start(self.removeframe_button, False, False, 0)
 
-        #Skip X frames forward or backwards 
-        self.frame_skip_spinner = Gtk.SpinButton()
-        self.frame_skip_spinner.set_range(1, 100)
-        self.frame_skip_spinner.set_increments(1, 10)
-        self.frame_skip_spinner.set_value(self.frame_skip_value)
-        self.frame_skip_spinner.connect("value-changed", self.on_frame_skip_value_changed)
-        hbox_controls.pack_start(Gtk.Label(label="Skip X frames:"), False, False, 0)
-        hbox_controls.pack_start(self.frame_skip_spinner, False, False, 0)
-
         # Copy current frame to clipboard button next to the frame buttons
         copytoclip_button = Gtk.Button(label="Copy frame to clipboard")
         copytoclip_button.connect("clicked", self.copytoclip)
@@ -107,7 +98,7 @@ class ScreenshotOptmizer(Gtk.Window):
         clearall_button.connect("clicked", self.clearall)
         hbox_controls.pack_start(clearall_button, False, False, 0)
 
-        # Settings button next to the frame buttons
+        # Settings button 
         settings_button = Gtk.Button(label="Settings")
         settings_button.connect("clicked", self.on_open_settings)
         hbox_controls.pack_start(settings_button, False, False, 0)
@@ -451,6 +442,19 @@ class ScreenshotOptmizer(Gtk.Window):
         self.threshold_spin.set_halign(Gtk.Align.CENTER)  # Center it
         self.threshold_spin.set_size_request(100, 10)  # Adjust width as needed
         grid2.attach(self.threshold_spin, 1, 2, 1, 1)  # Attach the spin button
+
+        # Label for threshold range
+        FrameSkip_label = Gtk.Label(label="Skip X frames:")
+        grid2.attach(FrameSkip_label, 0, 3, 1, 1) 
+
+        #Skip X frames forward or backwards
+        self.frame_skip_spinner_adj = Gtk.Adjustment(value=self.frame_skip_value, lower=1, upper=100, step_increment=1, page_increment=10, page_size=0)
+        self.frame_skip_spinner = Gtk.SpinButton(adjustment=self.frame_skip_spinner_adj)
+        self.frame_skip_spinner.connect("value-changed", self.on_frame_skip_value_changed)
+
+        self.frame_skip_spinner.set_halign(Gtk.Align.CENTER)  # Center it
+        self.frame_skip_spinner.set_size_request(100, 10)  # Adjust width as needed
+        grid2.attach(self.frame_skip_spinner, 1, 3, 1, 1)  # Attach the spin button
         
         #TODO add the screenshot configurations here
 
@@ -463,6 +467,7 @@ class ScreenshotOptmizer(Gtk.Window):
         if response == Gtk.ResponseType.OK:
             self.frame_analysis_value = self.frame_analysis_spin.get_value_as_int()
             self.threshold = self.threshold_spin.get_value_as_int()
+            self.frame_skip_value=self.frame_skip_spinner.get_value_as_int()
 
         dialog.destroy()
 
@@ -485,4 +490,5 @@ def main():
     Gtk.main()
 
 if __name__ == "__main__":
+    main()
     main()
