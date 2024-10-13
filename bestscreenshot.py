@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import gi
-gi.require_version("Gtk", "3.0")
 gi.require_version('Rsvg', '2.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject, GdkPixbuf, GLib, Gdk, Rsvg
 from moviepy.editor import VideoFileClip
 import os
@@ -101,11 +101,6 @@ class ScreenshotOptmizer(Gtk.Window):
         self.optimize_checkbox.set_active(True)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
-        # Copy current frame to clipboard button next to the frame buttons
-        copytoclip_button = Gtk.Button(label="Copy frame to clipboard")
-        copytoclip_button.connect("clicked", self.copytoclip)
-        hbox_controls.pack_start(copytoclip_button, False, False, 0)
-
         # Clear all inputs button next to the frame buttons
         clearall_button = Gtk.Button(label="Clear all inputs")
         clearall_button.connect("clicked", self.clearall)
@@ -126,10 +121,21 @@ class ScreenshotOptmizer(Gtk.Window):
         self.status_label = Gtk.Label(label="")
         grid.attach(self.status_label, 0, 5, 3, 1)
 
+        # second HBox to hold take screenshot & copy to clipboard
+        hbox_controls2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_controls2.set_halign(Gtk.Align.FILL)  # Center align the hbox_controls
+
         # Screenshot button
         screenshot_button = Gtk.Button(label="Take Screenshot")
         screenshot_button.connect("clicked", self.on_take_screenshot)
-        grid.attach(screenshot_button, 0, 6, 3, 1)
+        hbox_controls2.pack_start(screenshot_button, True, True, 0)
+
+        # Copy current frame to clipboard button next to the frame buttons
+        copytoclip_button = Gtk.Button(label="Copy frame to clipboard")
+        copytoclip_button.connect("clicked", self.copytoclip)
+        hbox_controls2.pack_start(copytoclip_button, True, True, 0)                                                     
+
+        grid.attach(hbox_controls2, 0, 6, 3, 1)
 
         self.frame_images = []
         self.current_frame = 0
@@ -202,7 +208,7 @@ class ScreenshotOptmizer(Gtk.Window):
         
 
     def on_select_input_file(self, widget):
-        self.clearall(widget) # This makes sure that repetaed inputs activate the loading animation 
+        self.clearall(widget) #isso é importante pra caso o usuário selecione um arquivo depois do outro
         dialog = Gtk.FileChooserDialog(
             title="Select Input File", parent=self, action=Gtk.FileChooserAction.OPEN
         )
@@ -414,14 +420,18 @@ class ScreenshotOptmizer(Gtk.Window):
         content_area = dialog.get_content_area()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         vbox.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
+        vbox.set_margin_top(15)            # Add top margin
+        vbox.set_margin_bottom(15)         # Add bottom margin
+        vbox.set_margin_start(15)          # Add left margin
+        vbox.set_margin_end(15)            # Add right margin
         content_area.pack_start(vbox, False, False, 0)
         dialog.set_default_size(420, 180)
 
         # Create the grid
         grid2 = Gtk.Grid()
         grid2.set_column_homogeneous(False)
-        grid2.set_column_spacing(10)
-        grid2.set_row_spacing(10)
+        grid2.set_column_spacing(15)
+        grid2.set_row_spacing(15)
         vbox.pack_start(grid2, True, True, 0)
 
         # Label for the output folder
