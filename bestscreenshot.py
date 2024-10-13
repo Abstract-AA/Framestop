@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import gi
 gi.require_version("Gtk", "3.0")
+gi.require_version('Rsvg', '2.0')
 from gi.repository import Gtk, GObject, GdkPixbuf, GLib, Gdk, Rsvg
 from moviepy.editor import VideoFileClip
 import os
