@@ -24,7 +24,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.set_default_size(800, 600)
         self.output_auto = True  # Automatically assign input folder to output folder by default
         self.frame_skip_value = 1
-        self.frame_analysis_value=5
+        self.frame_analysis_value = 5
         self.threshold = 5
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -35,7 +35,6 @@ class ScreenshotOptmizer(Gtk.Window):
         grid.set_column_spacing(10)
         grid.set_row_spacing(10)
         vbox.pack_start(grid, True, True, 0)
-        self.frame_skip_value = 1 
 
         # Input file path
         input_label = Gtk.Label(label="Input File:")
@@ -63,13 +62,36 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_area.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         grid.attach(self.frame_area, 0, 2, 3, 1)
 
+        # Adjustment for the slider
         adjustment = Gtk.Adjustment(value=0, lower=0, upper=0, step_increment=1, page_increment=1)
         self.frame_slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=adjustment)
         self.frame_slider.set_digits(0)
         self.frame_slider.connect("value-changed", self.on_frame_slider_changed)
-        grid.attach(self.frame_slider, 0, 3, 3, 1)
 
-        # HBox to hold checkbox and + / - buttons
+        # Horizontal box for the slider and arrow buttons
+        hbox_slider = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+
+        # Arrow button to skip frames backward
+        self.removeframe_button = Gtk.Button()
+        arrow_left = Gtk.Image.new_from_icon_name("go-previous", Gtk.IconSize.BUTTON)
+        self.removeframe_button.set_image(arrow_left)
+        self.removeframe_button.connect("clicked", self.on_remove_frame)
+
+        # Arrow button to skip frames forward
+        self.addframe_button = Gtk.Button()
+        arrow_right = Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.BUTTON)
+        self.addframe_button.set_image(arrow_right)
+        self.addframe_button.connect("clicked", self.on_add_frame)
+
+        # Adding components to hbox
+        hbox_slider.pack_start(self.removeframe_button, False, False, 0)  # Left arrow button
+        hbox_slider.pack_start(self.frame_slider, True, True, 0)          # Frame slider
+        hbox_slider.pack_start(self.addframe_button, False, False, 0)     # Right arrow button
+
+        # Attach hbox_slider to grid in place of the previous frame slider
+        grid.attach(hbox_slider, 0, 3, 3, 1)
+
+        # HBox to hold checkbox and other buttons
         hbox_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox_controls.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
 
@@ -78,22 +100,12 @@ class ScreenshotOptmizer(Gtk.Window):
         self.optimize_checkbox.set_active(True)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
 
-        # Add frame button
-        self.addframe_button = Gtk.Button(label="+ 1 frame")
-        self.addframe_button.connect("clicked", self.on_add_frame)
-        hbox_controls.pack_start(self.addframe_button, False, False, 0)
-
-        # Remove frame button
-        self.removeframe_button = Gtk.Button(label="- 1 frame")
-        self.removeframe_button.connect("clicked", self.on_remove_frame)
-        hbox_controls.pack_start(self.removeframe_button, False, False, 0)
-
         # Copy current frame to clipboard button next to the frame buttons
         copytoclip_button = Gtk.Button(label="Copy frame to clipboard")
         copytoclip_button.connect("clicked", self.copytoclip)
         hbox_controls.pack_start(copytoclip_button, False, False, 0)
 
-        # Copy current frame to clipboard button next to the frame buttons
+        # Clear all inputs button next to the frame buttons
         clearall_button = Gtk.Button(label="Clear all inputs")
         clearall_button.connect("clicked", self.clearall)
         hbox_controls.pack_start(clearall_button, False, False, 0)
@@ -102,6 +114,11 @@ class ScreenshotOptmizer(Gtk.Window):
         settings_button = Gtk.Button(label="Settings")
         settings_button.connect("clicked", self.on_open_settings)
         hbox_controls.pack_start(settings_button, False, False, 0)
+
+        # About button 
+        about_button = Gtk.Button(label="About")
+        about_button.connect("clicked", self.on_about_button_clicked)
+        hbox_controls.pack_start(about_button, False, False, 0)
 
         grid.attach(hbox_controls, 0, 4, 3, 1)
 
@@ -142,7 +159,6 @@ class ScreenshotOptmizer(Gtk.Window):
         adjustment.set_lower(0)
         adjustment.set_upper(0)
         self.status_label.set_text("")
-        self.frame_skip_spinner.set_value(1)     # Reset the spinner to its default value
         self.stop_loading_animation()
 
     def copytoclip(self,widget):
@@ -177,11 +193,11 @@ class ScreenshotOptmizer(Gtk.Window):
     def on_frame_skip_value_changed(self, widget):
         self.frame_skip_value = widget.get_value_as_int()
         if self.frame_skip_value == 1:
-            self.removeframe_button.set_label(f"- {self.frame_skip_value} frame")
-            self.addframe_button.set_label(f"+ {self.frame_skip_value} frame")
+            self.removeframe_button.set_label(f"< - {self.frame_skip_value} frame")
+            self.addframe_button.set_label(f"+ {self.frame_skip_value} frame >")
         else:
-            self.removeframe_button.set_label(f"- {self.frame_skip_value} frames")
-            self.addframe_button.set_label(f"+ {self.frame_skip_value} frames")
+            self.removeframe_button.set_label(f"< - {self.frame_skip_value} frames")
+            self.addframe_button.set_label(f"+ {self.frame_skip_value} frames >")
         
 
     def on_select_input_file(self, widget):
@@ -471,6 +487,36 @@ class ScreenshotOptmizer(Gtk.Window):
 
         dialog.destroy()
 
+    def on_about_button_clicked(self, widget):
+        about_dialog = Gtk.Dialog(title="About Screenshot Optimizer", transient_for=self, flags=0)
+        about_dialog.set_default_size(220, 220)
+        about_dialog.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+        # Create a label with information about the program
+        about_label = Gtk.Label(label=(
+            "\n"
+            "   This program is a screenshot tool that allows for the automatic selection of the clearer frame in a video or gif.  \n\n "
+            "   Usage:\n   "
+            "    1. Select an input video file.\n    "
+            "   2. Set the frame skip value and optimization settings.\n    "
+            "   3. Use the slider to navigate through frames and take screenshots.\n    "
+            "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
+            "   In the Settings menu, the threshold value is .... Jala manda aquela especificada monstra aqui pfpf\n\n   "
+            "   Version 1.0. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
+        ))
+        about_label.set_justify(Gtk.Justification.LEFT)  # Center the text justification
+        about_label.set_halign(Gtk.Align.CENTER)
+
+        # Add the label to the content area
+        about_content_area = about_dialog.get_content_area()
+        about_content_area.pack_start(about_label, True, True, 0)
+
+        # Show all components
+        about_dialog.show_all()
+
+        # Run the dialog and wait for response
+        about_dialog.run()
+        about_dialog.destroy()
+
     def on_toggle_auto_output_folder(self, widget):
         self.output_auto = widget.get_active()
         print(f"Automatic output folder selection: {self.output_auto}")
@@ -490,5 +536,4 @@ def main():
     Gtk.main()
 
 if __name__ == "__main__":
-    main()
     main()
