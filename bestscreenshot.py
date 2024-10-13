@@ -115,6 +115,11 @@ class ScreenshotOptmizer(Gtk.Window):
         settings_button.connect("clicked", self.on_open_settings)
         hbox_controls.pack_start(settings_button, False, False, 0)
 
+        # About button 
+        about_button = Gtk.Button(label="About")
+        about_button.connect("clicked", self.on_about_button_clicked)
+        hbox_controls.pack_start(about_button, False, False, 0)
+
         grid.attach(hbox_controls, 0, 4, 3, 1)
 
         self.status_label = Gtk.Label(label="")
@@ -481,6 +486,36 @@ class ScreenshotOptmizer(Gtk.Window):
             self.frame_skip_value=self.frame_skip_spinner.get_value_as_int()
 
         dialog.destroy()
+
+    def on_about_button_clicked(self, widget):
+        about_dialog = Gtk.Dialog(title="About Screenshot Optimizer", transient_for=self, flags=0)
+        about_dialog.set_default_size(220, 220)
+        about_dialog.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+        # Create a label with information about the program
+        about_label = Gtk.Label(label=(
+            "\n"
+            "   This program is a screenshot tool that allows for the automatic selection of the clearer frame in a video or gif.  \n\n "
+            "   Usage:\n   "
+            "    1. Select an input video file.\n    "
+            "   2. Set the frame skip value and optimization settings.\n    "
+            "   3. Use the slider to navigate through frames and take screenshots.\n    "
+            "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
+            "   In the Settings menu, the threshold value is .... Jala manda aquela especificada monstra aqui pfpf\n\n   "
+            "   Version 1.0. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
+        ))
+        about_label.set_justify(Gtk.Justification.LEFT)  # Center the text justification
+        about_label.set_halign(Gtk.Align.CENTER)
+
+        # Add the label to the content area
+        about_content_area = about_dialog.get_content_area()
+        about_content_area.pack_start(about_label, True, True, 0)
+
+        # Show all components
+        about_dialog.show_all()
+
+        # Run the dialog and wait for response
+        about_dialog.run()
+        about_dialog.destroy()
 
     def on_toggle_auto_output_folder(self, widget):
         self.output_auto = widget.get_active()
