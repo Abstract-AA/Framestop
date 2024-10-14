@@ -506,7 +506,11 @@ class ScreenshotOptmizer(Gtk.Window):
 
         # Create a vertical box to hold both the icon and the text
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        vbox.set_halign(Gtk.Align.CENTER)  # Center the contents horizontally
+        vbox.set_halign(Gtk.Align.CENTER)  # Center align the hbox_controls
+        vbox.set_margin_top(15)            # Add top margin
+        vbox.set_margin_bottom(15)         # Add bottom margin
+        vbox.set_margin_start(15)          # Add left margin
+        vbox.set_margin_end(15)            # Add right margin
 
         # Load the SVG icon
         icon_path = "best-screenshot-icon.svg"  # Update with your SVG icon path
@@ -536,7 +540,7 @@ class ScreenshotOptmizer(Gtk.Window):
         "   2. Set the frame skip value and optimization settings.\n    "
         "   3. Use the slider to navigate through frames and take screenshots.\n    "
         "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
-        "   In the Settings menu, the threshold value is .... Jala manda aquela especificada monstra aqui pfpf\n\n   "
+        "   In the Settings menu, the threshold value represents how strict the frame selection will be, i.e. higher \n     threshold values mean that only very clear frames will be selected. \n\n "
         "   Version 1.0. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
         ))
         about_label.set_justify(Gtk.Justification.LEFT)
