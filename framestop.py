@@ -17,7 +17,7 @@ if not Gtk.init_check():
     print("Failed to initialize GTK.")
     exit(1)
 
-class ScreenshotOptmizer(Gtk.Window):
+class framestop(Gtk.Window):
 
     def __init__(self):
         super().__init__(title="Screenshot Optimizer")
@@ -27,6 +27,7 @@ class ScreenshotOptmizer(Gtk.Window):
         self.frame_skip_value = 1
         self.frame_analysis_value = 5
         self.threshold = 5
+        self.scale_factor = 1.0
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.add(vbox)
@@ -100,6 +101,16 @@ class ScreenshotOptmizer(Gtk.Window):
         self.optimize_checkbox = Gtk.CheckButton(label="Apply Optimization")
         self.optimize_checkbox.set_active(True)
         hbox_controls.pack_start(self.optimize_checkbox, False, False, 0)
+
+        # Zoom in button
+        zoom_in_button = Gtk.Button(label="Zoom In")
+        zoom_in_button.connect("clicked", self.on_zoom_in)
+        hbox_controls.pack_start(zoom_in_button, False, False, 0)
+
+        # Zoom out button
+        zoom_out_button = Gtk.Button(label="Zoom Out")
+        zoom_out_button.connect("clicked", self.on_zoom_out)
+        hbox_controls.pack_start(zoom_out_button, False, False, 0)
 
         # Clear all inputs button next to the frame buttons
         clearall_button = Gtk.Button(label="Clear all inputs")
@@ -314,31 +325,59 @@ class ScreenshotOptmizer(Gtk.Window):
         if not self.frame_images:
             return
 
-        image = self.frame_images[frame_index]
+        frame_image = self.frame_images[frame_index]
 
-        # Retrieve the Gtk.Viewport and its child (the Gtk.Image)
+        # Calculate the scaled width and height
+        scaled_width = int(frame_image.width * self.scale_factor)
+        scaled_height = int(frame_image.height * self.scale_factor)
+
+        # Check if there's already a Gtk.Viewport inside the ScrolledWindow
         viewport = self.frame_area.get_child()  # Get the Gtk.Viewport inside the ScrolledWindow
         if viewport and viewport.get_children():
-            image_widget = viewport.get_children()[0]  # The Gtk.Image inside the Viewport
+            # If a Gtk.Image exists inside the Viewport, update its pixbuf
+            frame_image_widget = viewport.get_children()[0]
         else:
-            image_widget = Gtk.Image()
-            self.frame_area.add(image_widget)
+            # Create a new Gtk.Image if no widget exists yet
+            frame_image_widget = Gtk.Image()
+            self.frame_area.add(frame_image_widget)
 
+        # Create or retrieve the Pixbuf, cache it if necessary
         if frame_index < len(self.pixbuf_cache):
             pixbuf = self.pixbuf_cache[frame_index]
         else:
-            buffer = image.tobytes()
+            # Convert the frame_image to a GdkPixbuf object
+            buffer = frame_image.tobytes()
             pixbuf = GdkPixbuf.Pixbuf.new_from_data(
                 buffer,
                 GdkPixbuf.Colorspace.RGB,
                 False, 8,
-                image.width, image.height,
-                image.width * 3
+                frame_image.width, frame_image.height,
+                frame_image.width * 3
             )
             self.pixbuf_cache.append(pixbuf)
-        # Update the image widget instead of removing and re-adding it
-        image_widget.set_from_pixbuf(pixbuf)
+
+        # Scale the pixbuf to the new size
+        scaled_pixbuf = pixbuf.scale_simple(scaled_width, scaled_height, GdkPixbuf.InterpType.BILINEAR)
+
+        # Update the Gtk.Image widget with the new scaled pixbuf
+        frame_image_widget.set_from_pixbuf(scaled_pixbuf)
+
+        # Ensure everything is visible
         self.frame_area.show_all()
+
+    def on_zoom_in(self, widget):
+        """ Zoom in by increasing the scale factor and updating the display. """
+        self.scale_factor *= 1.1
+        self.update_frame_display(self.current_frame)
+
+    def on_zoom_out(self, widget):
+        """ Zoom out by decreasing the scale factor and updating the display. """
+        self.scale_factor /= 1.1
+        self.update_frame_display(self.current_frame)
+
+    def on_window_resize(self, widget, allocation):
+        """ Handle window resize and adjust frame size accordingly. """
+        self.update_frame_display(self.current_frame)
 
     def on_take_screenshot(self, widget):
         if not self.frame_images:
@@ -513,7 +552,7 @@ class ScreenshotOptmizer(Gtk.Window):
         vbox.set_margin_end(15)            # Add right margin
 
         # Load the SVG icon
-        icon_path = "/app/share/icons/hicolor/scalable/apps/com.AAoptimize.screenshot.svg"  # Update with your SVG icon path
+        icon_path = "/app/share/icons/hicolor/scalable/apps/io.github.Abstract-AA.Framestop.svg"  # Update with your SVG icon path
         try:
             handle = Rsvg.Handle.new_from_file(icon_path)  # Load the SVG file
             # Create a pixbuf from the SVG handle
@@ -541,7 +580,7 @@ class ScreenshotOptmizer(Gtk.Window):
         "   3. Use the slider to navigate through frames and take screenshots.\n    "
         "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
         "   In the Settings menu, the threshold value represents how strict the frame selection will be, i.e. higher \n     threshold values mean that only very clear frames will be selected. \n\n "
-        "   Version 1.0. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
+        "   Version 1.1. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
         ))
         about_label.set_justify(Gtk.Justification.LEFT)
         about_label.set_halign(Gtk.Align.CENTER)
@@ -574,7 +613,7 @@ class ScreenshotOptmizer(Gtk.Window):
         print(f"Threshold set at: {self.threshold_value}")
 
 def main():
-    app = ScreenshotOptmizer()
+    app = framestop()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
     Gtk.main()
