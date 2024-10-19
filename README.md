@@ -36,7 +36,7 @@ Replace `[Flatpak package URL]` with the actual URL of the app's Flatpak package
 ## Usage
 After installation, you can run the app using:
 ```
-flatpak run io.github.Abstract-AA.Framestop
+flatpak run io.github.Abstract_AA.Framestop
 ```
 
 ## Contributing
