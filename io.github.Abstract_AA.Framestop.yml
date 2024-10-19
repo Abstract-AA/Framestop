@@ -1,4 +1,4 @@
-id: io.github.Abstract-AA.Framestop
+id: io.github.Abstract_AA.Framestop
 runtime: org.gnome.Platform
 runtime-version: "46"
 sdk: org.gnome.Sdk
@@ -6,9 +6,10 @@ command: framestop
 finish-args:
   - --share=network
   - --filesystem=home
-  - --socket=x11  # For X11 display server
   - --socket=wayland  # For Wayland display server
-  - --talk-name=org.freedesktop.DBus  # D-Bus permissions
+  - --socket=x11  # For X11 display server
+  - --share=ipc
+  # - --talk-name=org.freedesktop.DBus  # D-Bus permissions
   - --device=dri  # For hardware acceleration
 
 modules:
@@ -17,8 +18,8 @@ modules:
     build-commands:
       # Install the Python script to the correct location, update this
       - install -D framestop.py /app/bin/framestop
-      - install -D io.github.Abstract-AA.Framestop.svg /app/share/icons/hicolor/scalable/apps/io.github.Abstract-AA.Framestop  # Icon must match app ID
-      - install -D io.github.Abstract-AA.Framestop.desktop /app/share/applications/io.github.Abstract-AA.Framestop.desktop  # .desktop file
+      - install -D io.github.Abstract_AA.Framestop.svg /app/share/icons/hicolor/scalable/apps/io.github.Abstract_AA.Framestop  # Icon must match app ID
+      - install -D io.github.Abstract_AA.Framestop.desktop /app/share/applications/io.github.Abstract_AA.Framestop.desktop  # .desktop file
     sources:
       - type: dir
         path: src/

@@ -6,3 +6,5 @@ pyvenv.cfg
 etc
 share
 .ipynb_checkpoints/
+repo/
+.flatpak-builder/

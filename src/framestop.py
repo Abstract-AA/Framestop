@@ -552,7 +552,7 @@ class framestop(Gtk.Window):
         vbox.set_margin_end(15)            # Add right margin
 
         # Load the SVG icon
-        icon_path = "/app/share/icons/hicolor/scalable/apps/io.github.AbstractAA.Framestop.svg"  # Update with your SVG icon path
+        icon_path = "/app/share/icons/hicolor/scalable/apps/io.github.Abstract_AA.Framestop.svg"  # Update with your SVG icon path
         try:
             handle = Rsvg.Handle.new_from_file(icon_path)  # Load the SVG file
             # Create a pixbuf from the SVG handle

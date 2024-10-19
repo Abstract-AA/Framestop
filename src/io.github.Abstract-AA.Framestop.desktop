@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Screenshot Optimizer
-Comment=Screenshot tool that allows for automatic selection of the best frame
-Exec=/app/bin/screenshot-optimizer
-Icon=io.github.Abstract-AA.Framestop.svg
-Terminal=false
-Type=Application
-Categories=Utility;Video;
