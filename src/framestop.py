@@ -20,7 +20,7 @@ if not Gtk.init_check():
 class framestop(Gtk.Window):
 
     def __init__(self):
-        super().__init__(title="Screenshot Optimizer")
+        super().__init__(title="Framestop")
         self.set_border_width(10)
         self.set_default_size(800, 600)
         self.output_auto = True  # Automatically assign input folder to output folder by default
