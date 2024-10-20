@@ -573,7 +573,7 @@ class framestop(Gtk.Window):
         # Create a label with information about the program
         about_label = Gtk.Label(label=(
         "\n"
-        "   This program is a screenshot tool that allows for the automatic selection of the clearer frame in a video or gif.  \n\n "
+        "   This program is a frame capture tool that allows for the automatic selection of the clearer frame in a video or gif.  \n\n "
         "   Usage:\n   "
         "    1. Select an input video file.\n    "
         "   2. Set the frame skip value and optimization settings.\n    "
