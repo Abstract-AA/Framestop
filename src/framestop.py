@@ -20,7 +20,7 @@ if not Gtk.init_check():
 class framestop(Gtk.Window):
 
     def __init__(self):
-        super().__init__(title="Screenshot Optimizer")
+        super().__init__(title="Framestop")
         self.set_border_width(10)
         self.set_default_size(800, 600)
         self.output_auto = True  # Automatically assign input folder to output folder by default
@@ -28,6 +28,10 @@ class framestop(Gtk.Window):
         self.frame_analysis_value = 5
         self.threshold = 5
         self.scale_factor = 1.0
+        self.cropping = False
+        self.crop_x1, self.crop_y1 = 100, 100
+        self.crop_x2, self.crop_y2 = 300, 300
+        self.dragging_handle = None
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.add(vbox)
@@ -63,6 +67,30 @@ class framestop(Gtk.Window):
         self.frame_area = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
         self.frame_area.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         grid.attach(self.frame_area, 0, 2, 3, 1)
+
+        # Use an overlay to display both the image and the crop tool
+        self.overlay = Gtk.Overlay()
+        self.frame_area.add(self.overlay)
+
+        # Image widget for displaying video frames
+        self.frame_image = Gtk.Image()
+        # Ensure the image does not capture input events
+        self.frame_image.set_sensitive(False)
+        self.overlay.add(self.frame_image)
+
+        # Drawing area for cropping
+        self.drawing_area = Gtk.DrawingArea()
+        self.drawing_area.set_size_request(800, 600)
+        self.drawing_area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
+        self.drawing_area.set_can_focus(True)
+        self.drawing_area.grab_focus()  # Ensure the drawing area can grab focus
+        self.drawing_area.connect("draw", self.on_draw)
+        self.drawing_area.connect("button-press-event", self.on_button_press)
+        self.drawing_area.connect("button-release-event", self.on_button_release)
+        self.drawing_area.connect("motion-notify-event", self.on_mouse_move)
+
+        # Add the drawing area to the overlay, above the image
+        self.overlay.add_overlay(self.drawing_area)
 
         # Adjustment for the slider
         adjustment = Gtk.Adjustment(value=0, lower=0, upper=0, step_increment=1, page_increment=1)
@@ -117,6 +145,11 @@ class framestop(Gtk.Window):
         clearall_button.connect("clicked", self.clearall)
         hbox_controls.pack_start(clearall_button, False, False, 0)
 
+        # Crop button
+        crop_button = Gtk.Button(label="Crop Mode")
+        crop_button.connect("clicked", self.toggle_crop_mode)
+        hbox_controls.pack_start(crop_button, False, False, 0)
+
         # Settings button 
         settings_button = Gtk.Button(label="Settings")
         settings_button.connect("clicked", self.on_open_settings)
@@ -132,7 +165,7 @@ class framestop(Gtk.Window):
         self.status_label = Gtk.Label(label="")
         grid.attach(self.status_label, 0, 5, 3, 1)
 
-        # second HBox to hold take screenshot & copy to clipboard
+        # Second HBox to hold take screenshot & copy to clipboard
         hbox_controls2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox_controls2.set_halign(Gtk.Align.FILL)  # Center align the hbox_controls
 
@@ -162,6 +195,94 @@ class framestop(Gtk.Window):
         
     def update_status(self, message):
         GLib.idle_add(self.status_label.set_text, message)
+    
+    def on_draw(self, widget, cr):
+        # Draw the cropping rectangle and handles if in cropping mode
+        if self.cropping:
+            allocation = widget.get_allocation()
+            cr.set_source_rgba(0, 0, 0, 0.7)
+            cr.rectangle(0, 0, allocation.width, allocation.height)
+            cr.fill()
+
+            # Draw the cropping rectangle (highlighted)
+            cr.set_source_rgba(1, 1, 1, 0.5)
+            cr.rectangle(self.crop_x1, self.crop_y1, self.crop_x2 - self.crop_x1, self.crop_y2 - self.crop_y1)
+            cr.fill_preserve()
+            cr.set_source_rgb(1, 1, 1)
+            cr.stroke()
+
+            # Draw handles
+            self.draw_handles(cr)
+
+    def draw_handles(self, cr):
+        handle_radius = 10
+        for x, y in [(self.crop_x1, self.crop_y1), (self.crop_x2, self.crop_y1), (self.crop_x2, self.crop_y2), (self.crop_x1, self.crop_y2)]:
+            cr.arc(x, y, handle_radius, 0, 2 * 3.14159)
+            cr.set_source_rgb(1, 0, 0)
+            cr.fill()
+
+    def toggle_crop_mode(self, widget):
+        self.cropping = not self.cropping
+        # Ensure the drawing area is visible and interactive
+        self.drawing_area.set_sensitive(self.cropping)
+        self.drawing_area.set_can_focus(True)
+        self.drawing_area.grab_focus()
+        self.drawing_area.queue_draw()
+
+    def on_button_press(self, widget, event):
+        if self.cropping:
+            self.dragging_handle = self.get_dragging_handle(event.x, event.y)
+
+    def on_button_release(self, widget, event):
+        self.dragging_handle = None
+
+    def on_mouse_move(self, widget, event):
+        if self.cropping and self.dragging_handle is not None:
+            if self.dragging_handle == 1:  # Top-left handle
+                self.crop_x1, self.crop_y1 = event.x, event.y
+            elif self.dragging_handle == 2:  # Top-right handle
+                self.crop_x2, self.crop_y1 = event.x, event.y
+            elif self.dragging_handle == 3:  # Bottom-right handle
+                self.crop_x2, self.crop_y2 = event.x, event.y
+            elif self.dragging_handle == 4:  # Bottom-left handle
+                self.crop_x1, self.crop_y2 = event.x, event.y
+
+            self.drawing_area.queue_draw()
+
+    def get_dragging_handle(self, x, y):
+        handle_radius = 10
+        if self.is_within_radius(x, y, self.crop_x1, self.crop_y1, handle_radius):
+            return 1
+        elif self.is_within_radius(x, y, self.crop_x2, self.crop_y1, handle_radius):
+            return 2
+        elif self.is_within_radius(x, y, self.crop_x2, self.crop_y2, handle_radius):
+            return 3
+        elif self.is_within_radius(x, y, self.crop_x1, self.crop_y2, handle_radius):
+            return 4
+        return None
+
+    def is_within_radius(self, x, y, cx, cy, radius):
+        return (x - cx) ** 2 + (y - cy) ** 2 <= radius ** 2
+
+    def update_frame_display(self, frame_index):
+        if not self.frame_images:
+            return
+
+        frame_image = self.frame_images[frame_index]
+
+        # Convert the frame_image (PIL Image) to a GdkPixbuf object
+        buffer = frame_image.tobytes()
+        pixbuf = GdkPixbuf.Pixbuf.new_from_data(
+            buffer,
+            GdkPixbuf.Colorspace.RGB,
+            False, 8,
+            frame_image.width, frame_image.height,
+            frame_image.width * 3
+        )
+
+        # Update the Gtk.Image widget with the pixbuf
+        self.frame_image.set_from_pixbuf(pixbuf)
+        self.frame_area.show_all()
 
     def clearall(self,widget):  # This is meant to essentially bring the program back to its base state
         self.frame_images = []
@@ -539,7 +660,7 @@ class framestop(Gtk.Window):
 
     def on_about_button_clicked(self, widget):
          # Create the About dialog
-        about_dialog = Gtk.Dialog(title="About Screenshot Optimizer", transient_for=self, flags=0)
+        about_dialog = Gtk.Dialog(title="Framestop", transient_for=self, flags=0)
         about_dialog.set_default_size(400, 400)  # Adjust size to fit the icon and text
         about_dialog.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
 
@@ -552,7 +673,7 @@ class framestop(Gtk.Window):
         vbox.set_margin_end(15)            # Add right margin
 
         # Load the SVG icon
-        icon_path = "/app/share/icons/hicolor/scalable/apps/io.github.AbstractAA.Framestop.svg"  # Update with your SVG icon path
+        icon_path = "/app/share/icons/hicolor/scalable/apps/io.github.Abstract_AA.Framestop.svg"  # Update with your SVG icon path
         try:
             handle = Rsvg.Handle.new_from_file(icon_path)  # Load the SVG file
             # Create a pixbuf from the SVG handle
@@ -580,7 +701,7 @@ class framestop(Gtk.Window):
         "   3. Use the slider to navigate through frames and take screenshots.\n    "
         "   4. Copy frames to the clipboard or save them to the output folder.\n\n  "
         "   In the Settings menu, the threshold value represents how strict the frame selection will be, i.e. higher \n     threshold values mean that only very clear frames will be selected. \n\n "
-        "   Version 1.1. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
+        "   Version 1.3. This program comes with absolutely no warranty. Check the MIT Licence for further details.  "
         ))
         about_label.set_justify(Gtk.Justification.LEFT)
         about_label.set_halign(Gtk.Align.CENTER)
