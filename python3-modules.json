@@ -1,0 +1,278 @@
+{
+    "name": "python3-modules",
+    "buildsystem": "simple",
+    "build-commands": [],
+    "modules": [
+        {
+            "name": "python3-basic_colormath",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"basic_colormath\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/51/75/2c3b39a1508f82213adec7b7bc01c574d3db47b1fd7f7033b8f89be984f8/basic_colormath-0.5.0-py3-none-any.whl",
+                    "sha256": "313716461955673fd2797e43710815d96f8254581073fbcbb2ecfa5aeee22d3a"
+                }
+            ]
+        },
+        {
+            "name": "python3-certifi",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"certifi\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/12/90/3c9ff0512038035f59d279fddeb79f5f1eccd8859f06d6163c58798b9487/certifi-2024.8.30-py3-none-any.whl",
+                    "sha256": "922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"
+                }
+            ]
+        },
+        {
+            "name": "python3-charset_normalizer",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"charset_normalizer\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/f2/4f/e1808dc01273379acc506d18f1504eb2d299bd4131743b9fc54d7be4df1e/charset_normalizer-3.4.0.tar.gz",
+                    "sha256": "223217c3d4f82c3ac5e29032b3f1c2eb0fb591b72161f86d93f5719079dae93e"
+                }
+            ]
+        },
+        {
+            "name": "python3-decorator",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"decorator\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/d5/50/83c593b07763e1161326b3b8c6686f0f4b0f24d5526546bee538c89837d6/decorator-5.1.1-py3-none-any.whl",
+                    "sha256": "b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"
+                }
+            ]
+        },
+        {
+            "name": "python3-idna",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"idna\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/idna-3.10-py3-none-any.whl",
+                    "sha256": "946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"
+                }
+            ]
+        },
+        {
+            "name": "python3-imageio",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"imageio\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/4e/e7/26045404a30c8a200e960fb54fbaf4b73d12e58cd28e03b306b084253f4f/imageio-2.36.0-py3-none-any.whl",
+                    "sha256": "471f1eda55618ee44a3c9960911c35e647d9284c68f077e868df633398f137f0"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/25/ca/1166b75c21abd1da445b97bf1fa2f14f423c6cfb4fc7c4ef31dccf9f6a94/numpy-2.1.3.tar.gz",
+                    "sha256": "aa08e04e08aaf974d4458def539dece0d28146d866a39da5639596f4921fd761"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/cd/74/ad3d526f3bf7b6d3f408b73fde271ec69dfac8b81341a318ce825f2b3812/pillow-10.4.0.tar.gz",
+                    "sha256": "166c1cd4d24309b30d61f79f4a9114b7b2313d7450912277855ff5dfd7cd4a06"
+                }
+            ]
+        },
+        {
+            "name": "python3-imageio_ffmpeg",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"imageio_ffmpeg\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/73/22/b0a0d96ecdbd4a8493c6cd7914a8b2bfbc39f8660f81c20e3bde847182e0/imageio-ffmpeg-0.5.1.tar.gz",
+                    "sha256": "0ed7a9b31f560b0c9d929c5291cd430edeb9bed3ce9a497480e536dd4326484c"
+                }
+            ]
+        },
+        {
+            "name": "python3-moviepy",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"moviepy\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/d5/50/83c593b07763e1161326b3b8c6686f0f4b0f24d5526546bee538c89837d6/decorator-5.1.1-py3-none-any.whl",
+                    "sha256": "b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/4e/e7/26045404a30c8a200e960fb54fbaf4b73d12e58cd28e03b306b084253f4f/imageio-2.36.0-py3-none-any.whl",
+                    "sha256": "471f1eda55618ee44a3c9960911c35e647d9284c68f077e868df633398f137f0"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/73/22/b0a0d96ecdbd4a8493c6cd7914a8b2bfbc39f8660f81c20e3bde847182e0/imageio-ffmpeg-0.5.1.tar.gz",
+                    "sha256": "0ed7a9b31f560b0c9d929c5291cd430edeb9bed3ce9a497480e536dd4326484c"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/a5/af/b1ac4ed4f88a19dfcad21b210036ae58d274977ac09666f5bd60121817a3/moviepy-2.0.0-py3-none-any.whl",
+                    "sha256": "c38f2db676f46c7beafeeb5b545eae88dcc252021500fb2ab3cd248dffd41ca6"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/25/ca/1166b75c21abd1da445b97bf1fa2f14f423c6cfb4fc7c4ef31dccf9f6a94/numpy-2.1.3.tar.gz",
+                    "sha256": "aa08e04e08aaf974d4458def539dece0d28146d866a39da5639596f4921fd761"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/cd/74/ad3d526f3bf7b6d3f408b73fde271ec69dfac8b81341a318ce825f2b3812/pillow-10.4.0.tar.gz",
+                    "sha256": "166c1cd4d24309b30d61f79f4a9114b7b2313d7450912277855ff5dfd7cd4a06"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/8b/f5/cab5cf6a540c31f5099043de0ae43990fd9cf66f75ecb5e9f254a4e4d4ee/proglog-0.1.10-py3-none-any.whl",
+                    "sha256": "19d5da037e8c813da480b741e3fa71fb1ac0a5b02bf21c41577c7f327485ec50"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/6a/3e/b68c118422ec867fa7ab88444e1274aa40681c606d59ac27de5a5588f082/python_dotenv-1.0.1-py3-none-any.whl",
+                    "sha256": "f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/2b/78/57043611a16c655c8350b4c01b8d6abfb38cc2acb475238b62c2146186d7/tqdm-4.67.0-py3-none-any.whl",
+                    "sha256": "0cd8af9d56911acab92182e88d763100d4788bdf421d251616040cc4d44863be"
+                }
+            ]
+        },
+        {
+            "name": "python3-numpy",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"numpy\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/25/ca/1166b75c21abd1da445b97bf1fa2f14f423c6cfb4fc7c4ef31dccf9f6a94/numpy-2.1.3.tar.gz",
+                    "sha256": "aa08e04e08aaf974d4458def539dece0d28146d866a39da5639596f4921fd761"
+                }
+            ]
+        },
+        {
+            "name": "python3-pillow",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"pillow\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/cd/74/ad3d526f3bf7b6d3f408b73fde271ec69dfac8b81341a318ce825f2b3812/pillow-10.4.0.tar.gz",
+                    "sha256": "166c1cd4d24309b30d61f79f4a9114b7b2313d7450912277855ff5dfd7cd4a06"
+                }
+            ]
+        },
+        {
+            "name": "python3-proglog",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"proglog\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/8b/f5/cab5cf6a540c31f5099043de0ae43990fd9cf66f75ecb5e9f254a4e4d4ee/proglog-0.1.10-py3-none-any.whl",
+                    "sha256": "19d5da037e8c813da480b741e3fa71fb1ac0a5b02bf21c41577c7f327485ec50"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/2b/78/57043611a16c655c8350b4c01b8d6abfb38cc2acb475238b62c2146186d7/tqdm-4.67.0-py3-none-any.whl",
+                    "sha256": "0cd8af9d56911acab92182e88d763100d4788bdf421d251616040cc4d44863be"
+                }
+            ]
+        },
+        {
+            "name": "python3-requests",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"requests\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/12/90/3c9ff0512038035f59d279fddeb79f5f1eccd8859f06d6163c58798b9487/certifi-2024.8.30-py3-none-any.whl",
+                    "sha256": "922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/f2/4f/e1808dc01273379acc506d18f1504eb2d299bd4131743b9fc54d7be4df1e/charset_normalizer-3.4.0.tar.gz",
+                    "sha256": "223217c3d4f82c3ac5e29032b3f1c2eb0fb591b72161f86d93f5719079dae93e"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/idna-3.10-py3-none-any.whl",
+                    "sha256": "946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl",
+                    "sha256": "70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/ce/d9/5f4c13cecde62396b0d3fe530a50ccea91e7dfc1ccf0e09c228841bb5ba8/urllib3-2.2.3-py3-none-any.whl",
+                    "sha256": "ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac"
+                }
+            ]
+        },
+        {
+            "name": "python3-tqdm",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"tqdm\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/2b/78/57043611a16c655c8350b4c01b8d6abfb38cc2acb475238b62c2146186d7/tqdm-4.67.0-py3-none-any.whl",
+                    "sha256": "0cd8af9d56911acab92182e88d763100d4788bdf421d251616040cc4d44863be"
+                }
+            ]
+        },
+        {
+            "name": "python3-urllib3",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"urllib3\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/ce/d9/5f4c13cecde62396b0d3fe530a50ccea91e7dfc1ccf0e09c228841bb5ba8/urllib3-2.2.3-py3-none-any.whl",
+                    "sha256": "ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac"
+                }
+            ]
+        }
+    ]
+}
